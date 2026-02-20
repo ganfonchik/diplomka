@@ -1,0 +1,26 @@
+# Ignore Visual Studio temporary files, build results, and user-specific files
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+publish/
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+# Visual Studio cache/options files
+*.vsix
+
+# OS files
+.DS_Store
+Thumbs.db
