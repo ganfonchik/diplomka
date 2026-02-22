@@ -6,8 +6,8 @@
     <Grid>
         <!-- Боковое меню -->
         <StackPanel Orientation="Vertical" Width="150" Background="LightGray" Margin="10,0,740,0">
-            <Button Content="Главная" Margin="5"/>
-            <Button Content="Настройки" Margin="5"/>
+            <Button Content="Главная" Margin="5" Click="Button_Click_1"/>
+            <Button Content="Настройки" Margin="5" Click="Button_Click"/>
             <Button Content="Лог" Margin="5"/>
         </StackPanel>
 
@@ -41,6 +41,13 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
+
+            <!-- Место для графика / навигации -->
+            <Grid Grid.Row="1">
+                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" />
+                <DataGrid x:Name="SensorTable" Visibility="Collapsed" AutoGenerateColumns="True" IsReadOnly="True"
+                          Background="White" Panel.ZIndex="1"/>
+            </Grid>
         </Grid>
         <materialDesign:Chip Content="Chip" Margin="993,102,0,0" VerticalAlignment="Top"/>
     </Grid>

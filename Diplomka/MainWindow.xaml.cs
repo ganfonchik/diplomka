@@ -8,84 +8,199 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.IO;
+using System.Linq;
 
 namespace Diplomka
 {
     public partial class MainWindow : Window
     {
-        // Данные для графика
         public ObservableCollection<double> TempValues { get; set; } = new();
         public ObservableCollection<double> HumidityValues { get; set; } = new();
-        public ObservableCollection<double> Co2Values { get; set; } = new();
+        public ObservableCollection<double> LightValues { get; set; } = new();
+
         private SerialPort? _serialPort;
         private bool _isSimulating = true;
+        private CartesianChart? _chart;
+        // История DTO для таблицы
+        private ObservableCollection<SensorDto> _sensorHistory = new();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Начальные данные
-            TempValues.Add(22); TempValues.Add(23); TempValues.Add(22.5);
-            HumidityValues.Add(50); HumidityValues.Add(52); HumidityValues.Add(49);
-            Co2Values.Add(400); Co2Values.Add(410); Co2Values.Add(405);
-
-            // Создаем серии
-            var series = new ISeries[]
+            // Покажем доступные COM-порты для отладки
+            try
             {
-                new LineSeries<double> { Values = TempValues, Name = "Температура" },
-                new LineSeries<double> { Values = HumidityValues, Name = "Влажность" },
-                new LineSeries<double> { Values = Co2Values, Name = "CO₂" }
-            };
+                TempCard.Text = "Ports: " + string.Join(",", SerialPort.GetPortNames());
+            }
+            catch { }
 
-            // Создаем график программно
-            var chart = new CartesianChart
+            // Начальные тестовые данные
+            TempValues.Add(22);
+            HumidityValues.Add(50);
+            LightValues.Add(400);
+
+            _chart = new CartesianChart
             {
-                Series = series,
+                Series = new ISeries[]
+                {
+                    new LineSeries<double> { Values = TempValues, Name = "Температура" },
+                    new LineSeries<double> { Values = HumidityValues, Name = "Влажность" },
+                    new LineSeries<double> { Values = LightValues, Name = "Свет" }
+                },
                 LegendPosition = LiveChartsCore.Measure.LegendPosition.Top
             };
 
-            // Помещаем график во второй ряд Grid
-            Grid.SetRow(chart, 1);
-            MainContentGrid.Children.Add(chart);
+            ContentFrame.Content = _chart;
+            // Убедиться, что таблица поверх фрейма
+            try { Panel.SetZIndex(SensorTable, 1); Panel.SetZIndex(ContentFrame, 0); } catch { }
 
-            // Таймер для обновления данных
             var timer = new DispatcherTimer
             {
-                Interval = System.TimeSpan.FromSeconds(1)
+                Interval = TimeSpan.FromSeconds(1)
             };
+
             timer.Tick += (s, e) =>
             {
-                if (!_isSimulating) return; // если подключен Arduino, не симулируем
+                if (!_isSimulating) return;
 
-                // Генерация новых данных (пример)
-                var newTemp = TempValues[^1] + 0.5;
+                var newTemp = TempValues[^1] + 0.2;
                 var newHum = HumidityValues[^1] + 0.3;
-                var newCo2 = Co2Values[^1] + 1;
+                var newLight = LightValues[^1] + 5;
 
                 TempValues.Add(newTemp);
                 HumidityValues.Add(newHum);
-                Co2Values.Add(newCo2);
+                LightValues.Add(newLight);
 
-                // Ограничиваем до 10 последних точек
                 if (TempValues.Count > 10) TempValues.RemoveAt(0);
                 if (HumidityValues.Count > 10) HumidityValues.RemoveAt(0);
-                if (Co2Values.Count > 10) Co2Values.RemoveAt(0);
-
-                // Обновляем карточки
-                TempCard.Text = $"{newTemp:F1} °C";
-                HumidityCard.Text = $"{newHum:F1} %";
-                Co2Card.Text = $"{newCo2} ppm";
+                if (LightValues.Count > 10) LightValues.RemoveAt(0);
             };
-            timer.Start();
 
-            // Попытаться подключиться к Arduino (асинхронно через попытки открытия доступных COM-портов)
-            StartSerial();
+            timer.Start();
+            // Попробуем загрузить сохранённые настройки и подключиться
+            LoadSettingsAndStart();
+        }
+
+        // --- Настройки API для Page1 ---
+        public void SetSimulation(bool simulate)
+        {
+            _isSimulating = simulate;
+            try { TempCard.Text = simulate ? "Simulation: on" : "Simulation: off"; } catch { }
+        }
+
+        public void ClearHistory()
+        {
+            _sensorHistory.Clear();
+            TempValues.Clear();
+            HumidityValues.Clear();
+            LightValues.Clear();
+            // вернуть начальные тестовые значения
+            TempValues.Add(22);
+            HumidityValues.Add(50);
+            LightValues.Add(400);
+        }
+
+        public void DisconnectPort()
+        {
+            try
+            {
+                if (_serialPort != null)
+                {
+                    try { _serialPort.DataReceived -= SerialPort_DataReceived; } catch { }
+                    try { _serialPort.Close(); } catch { }
+                    _serialPort = null;
+                }
+            }
+            catch { }
+            _isSimulating = true;
+            try { TempCard.Text = "Disconnected"; } catch { }
+        }
+
+        public bool ConnectToPort(string portName, int baud)
+        {
+            try
+            {
+                DisconnectPort();
+                var sp = new SerialPort(portName, baud)
+                {
+                    NewLine = "\n",
+                    ReadTimeout = 500
+                };
+                sp.DataReceived += SerialPort_DataReceived;
+                sp.Open();
+                _serialPort = sp;
+                _isSimulating = false;
+                try { TempCard.Text = $"Connected: {portName}@{baud}"; } catch { }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                try { File.AppendAllText("arduino_errors.log", DateTime.Now + $" ConnectToPort {portName}: " + ex + "\n"); } catch { }
+                try { TempCard.Text = $"Connect failed: {portName}"; } catch { }
+                return false;
+            }
+        }
+
+        private void LoadSettingsAndStart()
+        {
+            try
+            {
+                if (File.Exists("settings.json"))
+                {
+                    var txt = File.ReadAllText("settings.json");
+                    var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var settings = JsonSerializer.Deserialize<AppSettings>(txt, opts);
+                    if (settings != null)
+                    {
+                        _isSimulating = settings.Simulate;
+                        if (!string.IsNullOrWhiteSpace(settings.Port))
+                        {
+                            // попробуем подключиться к сохранённому порту
+                            ConnectToPort(settings.Port, settings.BaudRate);
+                        }
+                    }
+                }
+                else
+                {
+                    // если нет настроек, запускаем автоматический поиск
+                    StartSerial();
+                }
+            }
+            catch { StartSerial(); }
+        }
+
+        public void SaveSettings(string port, int baud, bool simulate)
+        {
+            try
+            {
+                var settings = new AppSettings { Port = port, BaudRate = baud, Simulate = simulate };
+                var txt = JsonSerializer.Serialize(settings);
+                File.WriteAllText("settings.json", txt);
+            }
+            catch { }
+        }
+
+        private class AppSettings
+        {
+            public string? Port { get; set; }
+            public int BaudRate { get; set; }
+            public bool Simulate { get; set; }
         }
 
         private void StartSerial()
         {
-            // Попробуем сначала явно COM3 (если он есть), затем остальные
+            // Получаем список портов и даём приоритет COM3, если он присутствует
             var ports = SerialPort.GetPortNames().ToList();
+            if (ports.Count == 0)
+            {
+                try { TempCard.Text = "Ports: (none)"; } catch { }
+                return;
+            }
+
+            try { TempCard.Text = "Ports: " + string.Join(",", ports); } catch { }
+
             if (ports.Contains("COM3"))
             {
                 ports.Remove("COM3");
@@ -96,21 +211,29 @@ namespace Diplomka
             {
                 try
                 {
-                    // Arduino code использует 9600 в приведённом скетче
-                    var sp = new SerialPort(portName, 9600) { NewLine = "\n", ReadTimeout = 500 };
+                    var sp = new SerialPort(portName, 9600)
+                    {
+                        NewLine = "\n",
+                        ReadTimeout = 500
+                    };
+
                     sp.DataReceived += SerialPort_DataReceived;
                     sp.Open();
-                    // успешно открыт - сохраняем и прекращаем симуляцию
+
                     _serialPort = sp;
+                    // Отладочная индикация подключения
+                    try { TempCard.Text = $"Connected: {portName}"; } catch { }
                     _isSimulating = false;
-                    TempCard.Text = $"Connected: {portName} @9600";
                     return;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // попытка не удалась, пробуем следующий порт
+                    // Логируем попытки открытия портов
+                    try { File.AppendAllText("arduino_errors.log", DateTime.Now + $" StartSerial try {portName}: " + ex + "\n"); } catch { }
                 }
             }
+
+            try { TempCard.Text = "No port opened"; } catch { }
         }
 
         private void SerialPort_DataReceived(object? sender, SerialDataReceivedEventArgs e)
@@ -120,44 +243,75 @@ namespace Diplomka
 
             try
             {
-                var line = sp.ReadLine(); // ожидаем JSON на строке
+                var line = sp.ReadLine();
                 if (string.IsNullOrWhiteSpace(line)) return;
 
-                var dto = JsonSerializer.Deserialize<SensorDto>(line, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                if (dto == null) return;
+                // Покажем сырой входящий JSON для отладки
+                try { Dispatcher.Invoke(() => TempCard.Text = line); } catch { }
 
-                // Пришли реальные данные — отключаем симуляцию
-                _isSimulating = false;
+                var dto = JsonSerializer.Deserialize<SensorDto>(line,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (dto == null) return;
 
                 Dispatcher.Invoke(() =>
                 {
-                    // Обновляем коллекции и UI
-                    var temperature = dto.TempDht ?? dto.TempLm35 ?? 0.0;
-                    var humidity = dto.Humidity ?? 0.0;
-                    TempValues.Add(temperature);
-                    HumidityValues.Add(humidity);
-                    // если есть свет, используем его как третью серию
-                    if (dto.Light.HasValue && dto.Light.Value != 0)
-                        Co2Values.Add(dto.Light.Value);
-                    else
-                        Co2Values.Add(0);
+                    int sensorCount = CountActiveSensors(dto);
 
-                    if (TempValues.Count > 10) TempValues.RemoveAt(0);
-                    if (HumidityValues.Count > 10) HumidityValues.RemoveAt(0);
-                    if (Co2Values.Count > 10) Co2Values.RemoveAt(0);
+                    if (sensorCount >= 5)
+                    {
+                        // Скрываем Frame целиком, чтобы он не перекрывал таблицу
+                        ContentFrame.Visibility = Visibility.Collapsed;
 
-                    TempCard.Text = $"{temperature:F1} °C";
-                    HumidityCard.Text = $"{humidity:F1} %";
-                    if (dto.Light.HasValue && dto.Light.Value != 0)
-                        Co2Card.Text = $"{dto.Light.Value:F0} lx";
+                        // Показать таблицу и добавить запись в историю
+                        SensorTable.Visibility = Visibility.Visible;
+                        _sensorHistory.Insert(0, dto);
+                        SensorTable.ItemsSource = _sensorHistory;
+                        try { Panel.SetZIndex(SensorTable, 10); Panel.SetZIndex(ContentFrame, 0); }
+                        catch { }
+                        // Для отладки показываем число активных сенсоров
+                        TempCard.Text = $"Sensors: {sensorCount}";
+                    }
                     else
-                        Co2Card.Text = "--";
+                    {
+                        // Показываем Frame (график) и скрываем таблицу
+                        ContentFrame.Visibility = Visibility.Visible;
+
+                        SensorTable.Visibility = Visibility.Collapsed;
+
+                        var temperature = dto.TempDht ?? dto.TempLm35 ?? 0;
+                        var humidity = dto.Humidity ?? 0;
+                        var light = dto.Light ?? 0;
+
+                        TempValues.Add(temperature);
+                        HumidityValues.Add(humidity);
+                        LightValues.Add(light);
+
+                        if (TempValues.Count > 10) TempValues.RemoveAt(0);
+                        if (HumidityValues.Count > 10) HumidityValues.RemoveAt(0);
+                        if (LightValues.Count > 10) LightValues.RemoveAt(0);
+                    }
                 });
             }
-            catch
+            catch (Exception ex)
             {
-                // игнорируем ошибки чтения/парсинга
+                try { File.AppendAllText("arduino_errors.log", DateTime.Now + " DataReceived: " + ex + "\n"); } catch { }
             }
+        }
+
+        private int CountActiveSensors(SensorDto dto)
+        {
+            int count = 0;
+
+            if (dto.TempLm35.HasValue) count++;
+            if (dto.TempDht.HasValue) count++;
+            if (dto.Humidity.HasValue) count++;
+            if (dto.Light.HasValue) count++;
+            if (dto.Co2.HasValue) count++;
+            if (dto.Water.HasValue) count++;
+            if (dto.Sound.HasValue) count++;
+
+            return count;
         }
 
         private class SensorDto
@@ -176,6 +330,37 @@ namespace Diplomka
 
             [JsonPropertyName("co2")]
             public double? Co2 { get; set; }
+
+            [JsonPropertyName("water")]
+            public double? Water { get; set; }
+
+            [JsonPropertyName("sound")]
+            public double? Sound { get; set; }
+        }
+        public bool IsSimulating => _isSimulating;
+        public string? CurrentPort => _serialPort?.PortName;
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            // Открыть страницу настроек в том же контейнере, передав ссылку на MainWindow
+            try
+            {
+                ContentFrame?.Navigate(new Page1(this));
+            }
+            catch { }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            // Показать основное содержимое (график)
+            try
+            {
+                SensorTable.Visibility = Visibility.Collapsed;
+                ContentFrame.Visibility = Visibility.Visible;
+                if (_chart != null)
+                    ContentFrame.Content = _chart;
+            }
+            catch { }
         }
     }
 }
