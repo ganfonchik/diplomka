@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-
+<!--fghj-->
                 <materialDesign:BundledTheme BaseTheme="Light"
                                          PrimaryColor="Blue"
                                          SecondaryColor="Lime"/>

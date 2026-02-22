@@ -32,7 +32,7 @@
                 <Button x:Name="SaveBtn" Content="Save" Width="80" Click="SaveBtn_Click" Margin="0,0,8,0"/>
                 <Button x:Name="ClearBtn" Content="Clear history" Width="120" Click="ClearBtn_Click"/>
             </StackPanel>
-
+<!--fghj-->
             <TextBlock x:Name="StatusText" Text="" Foreground="Gray" Margin="0,8,0,0"/>
         </StackPanel>
     </Grid>

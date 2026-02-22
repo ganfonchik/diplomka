@@ -64,7 +64,7 @@ namespace Diplomka
             _owner.SetSimulation(simulate);
             StatusText.Text = "Saved";
         }
-
+        // ctoto
         private void ClearBtn_Click(object sender, RoutedEventArgs e)
         {
             _owner.ClearHistory();

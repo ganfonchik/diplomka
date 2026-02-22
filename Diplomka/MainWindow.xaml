@@ -10,7 +10,7 @@
             <Button Content="Настройки" Margin="5" Click="Button_Click"/>
             <Button Content="Лог" Margin="5"/>
         </StackPanel>
-
+<!--fdsfads-->
         <!-- Основная область -->
         <Grid Margin="160,0,10,20" x:Name="MainContentGrid">
             <Grid.RowDefinitions>
