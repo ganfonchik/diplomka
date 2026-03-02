@@ -1,10 +1,12 @@
-﻿using LiveChartsCore;
+using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
 using System.Collections.ObjectModel;
 using System.IO.Ports;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Diplomka.Models;
+using Diplomka.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -256,6 +258,7 @@ namespace Diplomka
 
                 Dispatcher.Invoke(() =>
                 {
+                    try { LogService.Instance.Notify(dto); } catch { }
                     int sensorCount = CountActiveSensors(dto);
 
                     if (sensorCount >= 5)
@@ -263,7 +266,7 @@ namespace Diplomka
                         // Скрываем Frame целиком, чтобы он не перекрывал таблицу
                         ContentFrame.Visibility = Visibility.Collapsed;
 
-                        // Показать таблицу и добавить запись в историю
+                        // Показать таблицу и добавить запись в истории
                         SensorTable.Visibility = Visibility.Visible;
                         _sensorHistory.Insert(0, dto);
                         SensorTable.ItemsSource = _sensorHistory;
@@ -314,29 +317,7 @@ namespace Diplomka
             return count;
         }
 
-        private class SensorDto
-        {
-            [JsonPropertyName("temp_lm35")]
-            public double? TempLm35 { get; set; }
-
-            [JsonPropertyName("temp_dht")]
-            public double? TempDht { get; set; }
-
-            [JsonPropertyName("humidity")]
-            public double? Humidity { get; set; }
-
-            [JsonPropertyName("light")]
-            public double? Light { get; set; }
-
-            [JsonPropertyName("co2")]
-            public double? Co2 { get; set; }
-
-            [JsonPropertyName("water")]
-            public double? Water { get; set; }
-
-            [JsonPropertyName("sound")]
-            public double? Sound { get; set; }
-        }
+        
         public bool IsSimulating => _isSimulating;
         public string? CurrentPort => _serialPort?.PortName;
 
