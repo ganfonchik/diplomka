@@ -8,7 +8,7 @@
         <StackPanel Orientation="Vertical" Width="150" Background="LightGray" Margin="10,0,740,0">
             <Button Content="Главная" Margin="5" Click="Button_Click_1"/>
             <Button Content="Настройки" Margin="5" Click="Button_Click"/>
-            <Button Content="Лог" Margin="5"/>
+            <Button Content="Лог" Margin="5" Click="Button_Click_2"/>
         </StackPanel>
 <!--fdsfads-->
         <!-- Основная область -->

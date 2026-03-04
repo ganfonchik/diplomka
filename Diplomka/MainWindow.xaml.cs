@@ -323,7 +323,7 @@ namespace Diplomka
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // Открыть страницу настроек в том же контейнере, передав ссылку на MainWindow
+            
             try
             {
                 ContentFrame?.Navigate(new Page1(this));
@@ -340,6 +340,16 @@ namespace Diplomka
                 ContentFrame.Visibility = Visibility.Visible;
                 if (_chart != null)
                     ContentFrame.Content = _chart;
+            }
+            catch { }
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Window1 logWindow = new Window1();
+                logWindow.Show();
             }
             catch { }
         }

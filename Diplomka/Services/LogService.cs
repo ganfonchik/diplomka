@@ -13,7 +13,7 @@ namespace Diplomka.Services
         private SensorDto? _lastDto;
         private DateTime? _lastTime;
         private readonly DispatcherTimer _timer;
-        // Путь к файлу логов (можно использовать для отладки)
+
         public string LogFilePath => Path.Combine(Directory.GetCurrentDirectory(), "logs.jsonl");
 
         private LogService()
@@ -46,7 +46,7 @@ namespace Diplomka.Services
             try
             {
                 if (_lastDto == null || _lastTime == null) return;
-                var cutoff = DateTime.Now - TimeSpan.FromHours(1);
+                var cutoff = DateTime.Now - TimeSpan.FromMinutes(1);
                 if (_lastTime >= cutoff)
                 {
                     SaveDtoToDatabase(_lastDto, _lastTime.Value);
