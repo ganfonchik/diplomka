@@ -1,23 +1,19 @@
-﻿using Diplomka.Services;
-using System;
+﻿using Diplomka.Models;
+using Diplomka.Services;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace Diplomka
 {
     public partial class Window1 : Window
     {
-        private DispatcherTimer _timer = new DispatcherTimer();
-
         public Window1()
         {
             InitializeComponent();
             LoadLogs();
-
-            _timer.Interval = TimeSpan.FromSeconds(2);
-            _timer.Tick += (s, e) => LoadLogs();
-            _timer.Start();
         }
 
         private void LoadLogs()
@@ -26,20 +22,30 @@ namespace Diplomka
             {
                 string path = LogService.Instance.LogFilePath;
 
-                if (File.Exists(path))
+                if (!File.Exists(path))
+                    return;
+
+                var lines = File.ReadAllLines(path);
+
+                List<LogRecord> logs = new List<LogRecord>();
+
+                foreach (var line in lines)
                 {
-                    LogsTextBox.Text = File.ReadAllText(path);
-                    LogsTextBox.ScrollToEnd();
+                    try
+                    {
+                        var record = JsonSerializer.Deserialize<LogRecord>(line);
+
+                        if (record != null)
+                            logs.Add(record);
+                    }
+                    catch { }
                 }
-                else
-                {
-                    LogsTextBox.Text = "Файл логов пока не создан.";
-                }
+
+                logs = logs.OrderByDescending(x => x.Timestamp).ToList();
+
+                LogsGrid.ItemsSource = logs;
             }
-            catch (Exception ex)
-            {
-                LogsTextBox.Text = "Ошибка чтения логов: " + ex.Message;
-            }
+            catch { }
         }
     }
 }

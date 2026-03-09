@@ -46,7 +46,7 @@ namespace Diplomka.Services
             try
             {
                 if (_lastDto == null || _lastTime == null) return;
-                var cutoff = DateTime.Now - TimeSpan.FromMinutes(1);
+                var cutoff = DateTime.Now - TimeSpan.FromSeconds(10);
                 if (_lastTime >= cutoff)
                 {
                     SaveDtoToDatabase(_lastDto, _lastTime.Value);

@@ -7,18 +7,37 @@
         mc:Ignorable="d"
         Title="Window1" Height="450" Width="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="13*"/>
-            <ColumnDefinition Width="147*"/>
-        </Grid.ColumnDefinitions>
+        <DataGrid x:Name="LogsGrid"
+          Margin="10"
+          AutoGenerateColumns="False"
+          CanUserSortColumns="True">
 
-        <TextBox x:Name="LogsTextBox"
-         Grid.ColumnSpan="2"
-         Margin="10"
-         IsReadOnly="True"
-         VerticalScrollBarVisibility="Auto"
-         HorizontalScrollBarVisibility="Auto"
-         TextWrapping="Wrap"/>
+            <DataGrid.Columns>
 
+                <DataGridTextColumn Header="Дата"
+                            Binding="{Binding Timestamp}"
+                            SortMemberPath="Timestamp"/>
+
+                <DataGridTextColumn Header="Температура"
+                            Binding="{Binding Temp}" />
+
+                <DataGridTextColumn Header="Влажность"
+                            Binding="{Binding Humidity}" />
+
+                <DataGridTextColumn Header="Свет"
+                            Binding="{Binding Light}" />
+
+                <DataGridTextColumn Header="CO2"
+                            Binding="{Binding Co2}" />
+
+                <DataGridTextColumn Header="Вода"
+                            Binding="{Binding Water}" />
+
+                <DataGridTextColumn Header="Звук"
+                            Binding="{Binding Sound}" />
+
+            </DataGrid.Columns>
+
+        </DataGrid>
     </Grid>
 </Window>
