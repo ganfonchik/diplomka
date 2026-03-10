@@ -1,39 +1,120 @@
 ﻿<Page x:Class="Diplomka.Page1"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:Diplomka"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="settipage">
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d"
+      d:DesignHeight="700"
+      d:DesignWidth="800"
+      Title="Settings">
 
-    <Grid Background="AliceBlue">
-        <StackPanel Width="300" Margin="10">
-            <TextBlock Text="Настройки" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+    <Grid Background="#F4F6F9">
 
-            <TextBlock Text="COM-порт"/>
-            <ComboBox x:Name="PortCombo" Margin="0,4,0,8"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
 
-            <TextBlock Text="Baud rate"/>
-            <TextBox x:Name="BaudText" Text="9600" Margin="0,4,0,8"/>
+            <Grid>
 
-            <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
-                <TextBlock Text="Симуляция" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <CheckBox x:Name="SimulateCheck" VerticalAlignment="Center"/>
+                <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Text="Настройки подключения"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Margin="20"/>
+
+        <!-- Карточка настроек -->
+        <materialDesign:Card Grid.Row="1"
+                             Margin="20"
+                             Padding="20"
+                             Width="350"
+                             HorizontalAlignment="Left">
+
+            <StackPanel>
+
+                <TextBlock Text="COM-порт"
+                           FontWeight="Bold"
+                           Margin="0,5"/>
+
+                <ComboBox x:Name="PortCombo"
+                          Margin="0,5,0,10"
+                          Height="30"/>
+
+
+                <TextBlock Text="Baud Rate"
+                           FontWeight="Bold"
+                           Margin="0,5"/>
+
+                <TextBox x:Name="BaudText"
+                         Text="9600"
+                         Height="30"
+                         Margin="0,5,0,10"/>
+
+
+                <StackPanel Orientation="Horizontal" Margin="0,10">
+                    <TextBlock Text="Симуляция"
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <CheckBox x:Name="SimulateCheck"
+                              VerticalAlignment="Center"/>
+                </StackPanel>
+
+
+                <!-- Кнопки подключения -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,15,0,5">
+
+                    <Button x:Name="ConnectBtn"
+                            Content="Подключить"
+                            Width="120"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Click="ConnectBtn_Click"/>
+
+                    <Button x:Name="DisconnectBtn"
+                            Content="Отключить"
+                            Width="120"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Click="DisconnectBtn_Click"/>
+
+                </StackPanel>
+
+
+                <!-- Кнопки настроек -->
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,10">
+
+                    <Button x:Name="SaveBtn"
+                            Content="Сохранить"
+                            Width="120"
+                            Margin="0,0,10,0"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Click="SaveBtn_Click"/>
+
+                    <Button x:Name="ClearBtn"
+                            Content="Очистить логи"
+                            Width="140"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Click="ClearBtn_Click"/>
+
+                </StackPanel>
+
+
+                <!-- Статус -->
+                <TextBlock x:Name="StatusText"
+                           Text="Статус: не подключено"
+                           Foreground="Gray"
+                           Margin="0,20,0,0"/>
+
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,8">
-                <Button x:Name="ConnectBtn" Content="Connect" Width="80" Click="ConnectBtn_Click" Margin="0,0,8,0"/>
-                <Button x:Name="DisconnectBtn" Content="Disconnect" Width="80" Click="DisconnectBtn_Click"/>
-            </StackPanel>
+        </materialDesign:Card>
+            </Grid>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,8">
-                <Button x:Name="SaveBtn" Content="Save" Width="80" Click="SaveBtn_Click" Margin="0,0,8,0"/>
-                <Button x:Name="ClearBtn" Content="Clear history" Width="120" Click="ClearBtn_Click"/>
-            </StackPanel>
-<!--fghj-->
-            <TextBlock x:Name="StatusText" Text="" Foreground="Gray" Margin="0,8,0,0"/>
-        </StackPanel>
+        </ScrollViewer>
+
     </Grid>
 </Page>

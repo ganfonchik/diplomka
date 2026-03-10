@@ -47,5 +47,15 @@ namespace Diplomka
             }
             catch { }
         }
+        private void Filter_Click(object sender, RoutedEventArgs e)
+        {
+            LoadLogs();
+        }
+
+        private void Clear_Click(object sender, RoutedEventArgs e)
+        {
+            File.WriteAllText(LogService.Instance.LogFilePath, "");
+            LoadLogs();
+        }
     }
 }
