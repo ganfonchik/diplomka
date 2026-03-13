@@ -45,6 +45,9 @@ namespace Diplomka
 
             _chart = new CartesianChart
             {
+                Background = System.Windows.Media.Brushes.White,
+                Margin = new Thickness(10),
+
                 Series = new ISeries[]
                 {
                     new LineSeries<double> { Values = TempValues, Name = "Температура" },
@@ -83,6 +86,8 @@ namespace Diplomka
             timer.Start();
             // Попробуем загрузить сохранённые настройки и подключиться
             LoadSettingsAndStart();
+
+
         }
 
         // --- Настройки API для Page1 ---
@@ -191,6 +196,36 @@ namespace Diplomka
             public bool Simulate { get; set; }
         }
 
+
+        private void CheckWarnings(SensorDto dto)
+        {
+            double temperature = dto.TempDht ?? dto.TempLm35 ?? 0;
+            double humidity = dto.Humidity ?? 0;
+            double water = dto.Water ?? 0;
+            double sound = dto.Sound ?? 0;
+
+            if (temperature > 30)
+            {
+                WarningText.Text = "⚠ Температура слишком высокая!";
+            }
+            else if (humidity < 30 && humidity > 0)
+            {
+                WarningText.Text = "⚠ Слишком сухой воздух!";
+            }
+            else if (water > 0)
+            {
+                WarningText.Text = "⚠ Обнаружена вода!";
+            }
+            else if (sound > 500)
+            {
+                WarningText.Text = "⚠ Обнаружен громкий звук!";
+            }
+            else
+            {
+                WarningText.Text = "✅ Система работает нормально";
+            }
+        }
+
         private void StartSerial()
         {
             // Получаем список портов и даём приоритет COM3, если он присутствует
@@ -248,9 +283,6 @@ namespace Diplomka
                 var line = sp.ReadLine();
                 if (string.IsNullOrWhiteSpace(line)) return;
 
-                // Покажем сырой входящий JSON для отладки
-                try { Dispatcher.Invoke(() => TempCard.Text = line); } catch { }
-
                 var dto = JsonSerializer.Deserialize<SensorDto>(line,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -258,21 +290,19 @@ namespace Diplomka
 
                 Dispatcher.Invoke(() =>
                 {
+                    CheckWarnings(dto);
                     try { LogService.Instance.Notify(dto); } catch { }
                     int sensorCount = CountActiveSensors(dto);
 
                     if (sensorCount >= 5)
                     {
-                        // Скрываем Frame целиком, чтобы он не перекрывал таблицу
                         ContentFrame.Visibility = Visibility.Collapsed;
 
-                        // Показать таблицу и добавить запись в истории
                         SensorTable.Visibility = Visibility.Visible;
                         _sensorHistory.Insert(0, dto);
                         SensorTable.ItemsSource = _sensorHistory;
                         try { Panel.SetZIndex(SensorTable, 10); Panel.SetZIndex(ContentFrame, 0); }
                         catch { }
-                        // Для отладки показываем число активных сенсоров
                         TempCard.Text = $"Sensors: {sensorCount}";
                     }
                     else
@@ -285,6 +315,10 @@ namespace Diplomka
                         var temperature = dto.TempDht ?? dto.TempLm35 ?? 0;
                         var humidity = dto.Humidity ?? 0;
                         var light = dto.Light ?? 0;
+
+                        TempCard.Text = temperature + " °C";
+                        HumidityCard.Text = humidity + " %";
+                        Co2Card.Text = light.ToString();
 
                         TempValues.Add(temperature);
                         HumidityValues.Add(humidity);

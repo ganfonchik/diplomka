@@ -27,17 +27,20 @@
 
             <Separator Margin="5"/>
 
-            <Button Content="Главная"
-                    Margin="5"
-                    Click="Button_Click_1"/>
+            <Button Content="🏠 Главная"
+        Margin="5"
+        Height="40"
+        Click="Button_Click_1"/>
 
-            <Button Content="Настройки"
-                    Margin="5"
-                    Click="Button_Click"/>
+            <Button Content="⚙ Настройки"
+        Margin="5"
+        Height="40"
+        Click="Button_Click"/>
 
-            <Button Content="Логи"
-                    Margin="5"
-                    Click="Button_Click_2"/>
+            <Button Content="📜 Логи"
+        Margin="5"
+        Height="40"
+        Click="Button_Click_2"/>
 
         </StackPanel>
 
@@ -50,39 +53,90 @@
             </Grid.RowDefinitions>
 
             <!-- Карточки датчиков -->
-            <WrapPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,15">
+            <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,15">
 
-                <Border BorderBrush="Gray" BorderThickness="1" Margin="10" Padding="10">
+                <Border Background="White"
+            CornerRadius="8"
+            Margin="10"
+            Padding="15"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1">
+
                     <StackPanel>
-                        <TextBlock Text="Температура" FontWeight="Bold"/>
+                        <TextBlock Text="🌡 Температура"
+                       FontWeight="Bold"
+                       FontSize="14"
+                       Foreground="#555"/>
+
                         <TextBlock x:Name="TempCard"
-                                   Text="0 °C"
-                                   FontSize="24"
-                                   FontWeight="Bold"/>
+                       Text="0 °C"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Margin="0,5,0,0"/>
                     </StackPanel>
+
                 </Border>
 
-                <Border BorderBrush="Gray" BorderThickness="1" Margin="10" Padding="10">
+                <Border Background="White"
+            CornerRadius="8"
+            Margin="10"
+            Padding="15"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1">
+
                     <StackPanel>
-                        <TextBlock Text="Влажность" FontWeight="Bold"/>
+                        <TextBlock Text="💧 Влажность"
+                       FontWeight="Bold"
+                       FontSize="14"
+                       Foreground="#555"/>
+
                         <TextBlock x:Name="HumidityCard"
-                                   Text="0 %"
-                                   FontSize="24"
-                                   FontWeight="Bold"/>
+                       Text="0 %"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Margin="0,5,0,0"/>
                     </StackPanel>
+
                 </Border>
 
-                <Border BorderBrush="Gray" BorderThickness="1" Margin="10" Padding="10">
+                <Border Background="White"
+            CornerRadius="8"
+            Margin="10"
+            Padding="15"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1">
+
                     <StackPanel>
-                        <TextBlock Text="CO2 / Свет" FontWeight="Bold"/>
+                        <TextBlock Text="💡 Свет"
+                       FontWeight="Bold"
+                       FontSize="14"
+                       Foreground="#555"/>
+
                         <TextBlock x:Name="Co2Card"
-                                   Text="0"
-                                   FontSize="24"
-                                   FontWeight="Bold"/>
+                       Text="0"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       Margin="0,5,0,0"/>
                     </StackPanel>
+
                 </Border>
 
-            </WrapPanel>
+            </UniformGrid>
+
+            <Border Grid.Row="0"
+        Margin="10,110,10,0"
+        Padding="10"
+        Background="#FFF3CD"
+        BorderBrush="#FFC107"
+        BorderThickness="1"
+        CornerRadius="5">
+
+                <TextBlock x:Name="WarningText"
+               Text="✅ Система работает нормально"
+               FontSize="14"
+               FontWeight="Bold"
+               Foreground="#856404"/>
+            </Border>
 
             <!-- График / Таблица -->
             <Grid Grid.Row="1">
