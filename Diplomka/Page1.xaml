@@ -5,7 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
-      d:DesignHeight="700"
+      d:DesignHeight="600"
       d:DesignWidth="800"
       Title="Settings">
 
@@ -13,26 +13,19 @@
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
 
-            <Grid>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <StackPanel Margin="20">
 
                 <!-- Заголовок -->
                 <TextBlock Text="⚙ Настройки подключения"
-                           FontSize="24"
+                           FontSize="26"
                            FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           Margin="0,20,0,20"/>
+                           Margin="0,0,0,20"/>
 
-                <!-- Карточка настроек -->
-                <materialDesign:Card Grid.Row="1"
-                                     Padding="25"
-                                     Width="400"
-                                     HorizontalAlignment="Center"
-                                     VerticalAlignment="Top">
+
+                <!-- Основная карточка -->
+                <materialDesign:Card Padding="25"
+                                     Width="420"
+                                     HorizontalAlignment="Left">
 
                     <StackPanel>
 
@@ -58,7 +51,8 @@
 
 
                         <!-- Симуляция -->
-                        <StackPanel Orientation="Horizontal" Margin="0,10">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,10">
 
                             <TextBlock Text="🧪 Режим симуляции"
                                        VerticalAlignment="Center"
@@ -135,10 +129,16 @@
                     </StackPanel>
 
                 </materialDesign:Card>
+                <!-- Панель версии -->
+                <TextBlock Text="SensorHub v1.0"
+                           Margin="0,20,0,0"
+                           Foreground="Gray"
+                           FontSize="12"/>
 
-            </Grid>
+            </StackPanel>
 
         </ScrollViewer>
 
     </Grid>
+
 </Page>
