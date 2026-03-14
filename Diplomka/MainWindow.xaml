@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Система мониторинга датчиков"
-        Height="850"
+        Height="762"
         Width="1100"
         Background="#F4F6F9">
 
@@ -133,26 +133,7 @@
                     </materialDesign:Card>
 
 
-                    <!-- Блок статистики -->
-                    <materialDesign:Card Margin="10" Padding="10">
-
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Center">
-
-                            <TextBlock Text="📊 Сегодня записей: 0"
-                                       Margin="20"/>
-
-                            <TextBlock Text="🌡 Средняя температура: —"
-                                       Margin="20"/>
-
-                            <TextBlock Text="⚠ Предупреждений: 0"
-                                       Margin="20"/>
-
-                        </StackPanel>
-
-                    </materialDesign:Card>
-
-
+                    
                     <!-- График -->
                     <materialDesign:Card Margin="10" Padding="15">
 
