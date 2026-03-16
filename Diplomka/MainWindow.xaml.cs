@@ -31,14 +31,13 @@ namespace Diplomka
         {
             InitializeComponent();
 
-            // Покажем доступные COM-порты для отладки
             try
             {
                 TempCard.Text = "Ports: " + string.Join(",", SerialPort.GetPortNames());
             }
             catch { }
 
-            // Начальные тестовые данные
+
             TempValues.Add(22);
             HumidityValues.Add(50);
             LightValues.Add(400);
@@ -84,13 +83,12 @@ namespace Diplomka
             };
 
             timer.Start();
-            // Попробуем загрузить сохранённые настройки и подключиться
+
             LoadSettingsAndStart();
 
 
         }
 
-        // --- Настройки API для Page1 ---
         public void SetSimulation(bool simulate)
         {
             _isSimulating = simulate;
@@ -164,14 +162,12 @@ namespace Diplomka
                         _isSimulating = settings.Simulate;
                         if (!string.IsNullOrWhiteSpace(settings.Port))
                         {
-                            // попробуем подключиться к сохранённому порту
                             ConnectToPort(settings.Port, settings.BaudRate);
                         }
                     }
                 }
                 else
                 {
-                    // если нет настроек, запускаем автоматический поиск
                     StartSerial();
                 }
             }
@@ -357,35 +353,21 @@ namespace Diplomka
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            
-            try
-            {
-                ContentFrame?.Navigate(new Page1(this));
-            }
-            catch { }
+            DashboardPanel.Visibility = Visibility.Collapsed;
+            PageFrame.Visibility = Visibility.Visible;
+            PageFrame.Navigate(new Page1());
         }
         //hfgsdhgfd
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            // Показать основное содержимое (график)
-            try
-            {
-                SensorTable.Visibility = Visibility.Collapsed;
-                ContentFrame.Visibility = Visibility.Visible;
-                if (_chart != null)
-                    ContentFrame.Content = _chart;
-            }
-            catch { }
+            PageFrame.Visibility = Visibility.Collapsed;
+            DashboardPanel.Visibility = Visibility.Visible;
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                Window1 logWindow = new Window1();
-                logWindow.Show();
-            }
-            catch { }
+            Window1 log = new Window1();
+            log.Show();
         }
     }
 }
